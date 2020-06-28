@@ -1,3 +1,9 @@
+'''
+arif.darmawan@riflab.com
+
+20200211 first version
+'''
+
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from glob import glob as list_image
 import textwrap
@@ -10,7 +16,7 @@ def writeText(text, image, font_size=30, line_spacing=1.5, xo=265, yo=200, padx=
 	
 	image = image.convert("RGBA")
 
-	font_type = ImageFont.truetype('font/'+font, font_size)
+	font_type = ImageFont.truetype('../font/'+font, font_size)
 
 	draw = ImageDraw.Draw(image)
 	lines = textwrap.wrap(text, lineswidth)
@@ -44,7 +50,7 @@ def writeText(text, image, font_size=30, line_spacing=1.5, xo=265, yo=200, padx=
 	return image
 
 
-def imFilter(im, blur=3, xsize=1024, ysize=1024):
+def imFilter(im, blur=1, xsize=1024, ysize=1024):
 	size = (xsize, ysize)
 
 	image = Image.open(im)
@@ -83,22 +89,28 @@ def save_im(workdir, im, imDir, Saved=False):
 
 if __name__ == "__main__":
 
-	workdir = 'madu'
-	logo = workdir+'/images/'+'logo4.png'
-	images = list_image(workdir+'/images/'+'igpost*.png')
-	tagline = 'Madu Abu Hafs Kualitas Premium >>>'
-
+	workdir = '../data/'+'kurma'
+	logo = workdir+'/images/'+'logo.png'
+	images = list_image(workdir+'/images/'+'ig*.png')
+	tagline = 'Ada banyak sekali manfaat Madu jadi jangan tunggu lama lagi dan segera jadikan Madu sebagai suplemen wajib harian anda.'
+	contact = 'Pemesanan hubungi Arif >>> WA 0811-220-9194, IG @tokoalhaf, www.alhaf.com '
 	texts = read_docx(workdir)
 	
 	j=0
 	for i in range(len(texts)):
 		if j == len(images):
 			j=0
+		a = texts[i].split(': ')
 		im = imFilter(images[j])
-		im = writeText(texts[i], im, xo=265, yo=200)
-		im = writeText(tagline, im, xo=595, yo=978, font_size=26, transparancy=0)
-		im = add_images(im, logo, xo=50, yo=0)
-		save_im(workdir, im, images[j], True)
+		im = writeText(a[0], im, xo=265, yo=200, font_size=35, transparancy=20)
+		im = writeText(a[1], im, xo=265, yo=300, font_size=28, transparancy=20)
+		im = writeText(tagline, im, xo=265, yo=800, font_size=24, transparancy=20)
+		im = writeText(contact, im, xo=60, yo=950, font_size=24, transparancy=20, lineswidth=110, colortext='darkgreen')
+		im = add_images(im, logo, xo=40, yo=40)
+		
+		new_file = images[j].split('_')[0]+str(i)+'.png'
+
+		save_im(workdir, im, new_file, True)
 		j+=1
 
 		# im.show()
