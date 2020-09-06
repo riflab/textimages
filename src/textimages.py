@@ -2,17 +2,20 @@
 arif.darmawan@riflab.com
 
 20200211 first version
+20200906 update batch and separate processing
 '''
 
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 from glob import glob as list_image
 import textwrap
 import os
+import random
 from webcolors import name_to_rgb
 from docx import Document
 
+
 def writeText(text, image, font_size=30, line_spacing=1.5, xo=265, yo=200, padx=10, pady=10,  
-		lineswidth=45, font='BRLNSR.ttf', transparancy=30, colortext='black', colorbackground='white'):
+		lineswidth=30, font='BRLNSR.ttf', transparancy=100, colortext='black', colorbackground='white'):
 	
 	image = image.convert("RGBA")
 
@@ -50,20 +53,12 @@ def writeText(text, image, font_size=30, line_spacing=1.5, xo=265, yo=200, padx=
 	return image
 
 
-def imFilter(im, blur=1, xsize=1024, ysize=1024):
+def imFilter(im, blur=0, xsize=1024, ysize=1024):
 	size = (xsize, ysize)
 
 	image = Image.open(im)
-	image = image.resize(size,Image.ANTIALIAS)
-	image = image.filter(ImageFilter.GaussianBlur(blur))
-
-	return image
-
-def add_images(image, logo, xo=0, yo=0):
-	imglogo = Image.open(logo)
-	lx, ly = imglogo.size
-	ix, iy = image.size
-	image.paste(imglogo, (xo, yo), imglogo)
+	image = image.resize(size, Image.ANTIALIAS)
+	# image = image.filter(ImageFilter.GaussianBlur(blur))
 
 	return image
 
@@ -78,40 +73,56 @@ def read_docx(workdir):
 			i+=1
 	return texts
 
-def save_im(workdir, im, imDir, Saved=False):
-	if not os.path.exists(workdir+'/saved'):
-		os.makedirs(workdir+'/saved')
-
-	if Saved == True:
-		im.save(imDir.replace("/images", "/saved"))
+def save_im(path):
 	
-	print(imDir.replace("/images", "/saved"))
-
+	if not os.path.exists(os.path.dirname(path)):
+		os.makedirs(os.path.dirname(path))
+	im.save(path)
+	print(path)
 if __name__ == "__main__":
 
-	workdir = '../data/'+'kurma'
-	logo = workdir+'/images/'+'logo.png'
-	images = list_image(workdir+'/images/'+'ig*.png')
-	tagline = 'Ada banyak sekali manfaat Madu jadi jangan tunggu lama lagi dan segera jadikan Madu sebagai suplemen wajib harian anda.'
-	contact = 'Pemesanan hubungi Arif >>> WA 0811-220-9194, IG @tokoalhaf, www.alhaf.com '
-	texts = read_docx(workdir)
-	
-	j=0
-	for i in range(len(texts)):
-		if j == len(images):
-			j=0
-		a = texts[i].split(': ')
-		im = imFilter(images[j])
-		im = writeText(a[0], im, xo=265, yo=200, font_size=35, transparancy=20)
-		im = writeText(a[1], im, xo=265, yo=300, font_size=28, transparancy=20)
-		im = writeText(tagline, im, xo=265, yo=800, font_size=24, transparancy=20)
-		im = writeText(contact, im, xo=60, yo=950, font_size=24, transparancy=20, lineswidth=110, colortext='darkgreen')
-		im = add_images(im, logo, xo=40, yo=40)
+	workdir = 'madu'
+	path_image = '../data/' + workdir + '/images/*.JPG'
+	path_saved = '../data/' + workdir + '/saved/'
+	path_docx = '../data/' + workdir
+	batch = False
+	list_image = list_image(path_image)
+	list_docx = path_docx
+
+	texts = read_docx(path_docx)
+
+	if batch == False:
+		for i in range(len(texts)):
+			text = texts[i].split('. ')
+			for j in range(len(text)+1):
+				if j < len(text):
+					imP = list_image[random.randint(0, len(list_image)-2)]
+					im = imFilter(imP)
+					im = writeText(text[j], im, xo=60, yo=250, font_size=50, transparancy=20)
+					new_file = path_saved + str(i+1).zfill(2) + '/im_' + str(j+1).zfill(2) + '.JPG'
+					save_im(new_file)
+				else:
+					imP = list_image[26]
+					im = imFilter(imP)
+					im = writeText('Ayo Minum Madu Asli Murni Alami Hanya Di:', im, xo=60, yo=250, font_size=50, transparancy=20, lineswidth=18)
+					new_file = path_saved + str(i+1).zfill(2) + '/im_' + str(j+1).zfill(2) + '.JPG'
+					save_im(new_file)
+	else:
+		for i in range(len(texts)):
+			text = texts[i]
+
+			imP = list_image[random.randint(0, len(list_image)-2)]
+			im = imFilter(imP)
+			im = writeText(text, im, xo=60, yo=250, font_size=40, transparancy=20, lineswidth=40)
+			new_file = path_saved + str(i+1).zfill(2) + '/im_' + str(1).zfill(2) + '.JPG'
+			# im = add_images(im, logo, xo=40, yo=40)
+			save_im(new_file)
+
+			imP = list_image[26]
+			im = imFilter(imP)
+			im = writeText('Ayo Minum Madu Asli Murni Alami Hanya Di:', im, xo=60, yo=250, font_size=50, transparancy=20, lineswidth=18)
+			new_file = path_saved + str(i+1).zfill(2) + '/im_' + str(2).zfill(2) + '.JPG'
+			save_im(new_file)
 		
-		new_file = images[j].split('_')[0]+str(i)+'.png'
 
-		save_im(workdir, im, new_file, True)
-		j+=1
-
-		# im.show()
 		
