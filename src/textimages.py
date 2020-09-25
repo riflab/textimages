@@ -98,9 +98,28 @@ if __name__ == "__main__":
 				if j < len(text):
 					imP = list_image[random.randint(0, len(list_image)-2)]
 					im = imFilter(imP)
-					im = writeText(text[j], im, xo=60, yo=250, font_size=50, transparancy=20)
-					new_file = path_saved + str(i+1).zfill(2) + '/im_' + str(j+1).zfill(2) + '.JPG'
-					save_im(new_file)
+					try:
+						a = (len(text[j].split(' ')))
+
+						if j == 0:
+							font_size = 85
+							lineswidth = 20
+						else:
+							if a > 25:
+								font_size = 45
+								lineswidth = 40
+							else:
+								font_size = 60
+								lineswidth = 30
+
+						im = writeText(text[j], im, xo=60, yo=250, font_size=font_size, transparancy=20, lineswidth=lineswidth)
+						im = writeText(str(j+1) + ' / ' + str(len(text)+1), im, xo=980, yo=980, font_size=15, transparancy=40, lineswidth=lineswidth)
+						new_file = path_saved + str(i+1).zfill(2) + '/im_' + str(j+1).zfill(2) + '.JPG'
+						save_im(new_file)
+					# print(text[j])
+					except:
+						pass
+					
 				else:
 					imP = list_image[26]
 					im = imFilter(imP)
